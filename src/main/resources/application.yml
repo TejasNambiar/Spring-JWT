@@ -1,0 +1,55 @@
+jwt:
+  secret: 'eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY2ODU5NjE5MCwiaWF0IjoxNjY4NTk2MTkwfQ.7Pu_LGhe2XbHB9gN-WGpgp0HxdVJ3DTsFsQzkU6a4xw'
+
+server:
+  port: 8081
+#  error:
+#    whitelabel:
+#      enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      format_sql: true
+      dialect: org.hibernate.dialect.PostgreSQL81Dialect
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/supportportal
+    username: postgres
+    password: 2810
+    driverClassName: org.postgresql.Driver
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      format_sql: true
+      dialect: org.hibernate.dialect.PostgreSQL81Dialect
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/test-db
+    username: postgres
+    password: 2810
+    driverClassName: org.postgresql.Driver
+
+---
+
+spring.profiles.active: local
