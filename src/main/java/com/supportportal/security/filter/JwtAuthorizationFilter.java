@@ -1,6 +1,7 @@
-package com.supportportal.security;
+package com.supportportal.security.filter;
 
 import com.google.common.net.HttpHeaders;
+import com.supportportal.security.JwtTokenProvider;
 import com.supportportal.utility.SecurityConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
