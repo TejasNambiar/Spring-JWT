@@ -1,5 +1,7 @@
 package com.supportportal.security.enumeration;
 
+import java.util.List;
+
 import static com.supportportal.utility.Authority.*;
 
 public enum Role {
@@ -15,7 +17,7 @@ public enum Role {
         this.authorities = authorities;
     }
 
-    public String[] getAuthorities(){
-        return authorities;
+    public List<String> getAuthorities(){
+        return List.of(authorities);
     }
 }
