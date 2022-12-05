@@ -25,10 +25,13 @@ spring:
     username: postgres
     password: 2810
     driverClassName: org.postgresql.Driver
-  mvc:
-    throw-exception-if-no-handler-found: true
-  resources:
-    add-mappings: false
+# basically tells spring that if no handler found then to
+# throw the exception instead of handling it natively
+# disables a lot of handlers, Not preferred method
+#  mvc:
+#    throw-exception-if-no-handler-found: true
+#  resources:
+#    add-mappings: false
 
 ---
 

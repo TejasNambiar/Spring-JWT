@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/supportPortal")
+@RequestMapping(path = {"/","/supportPortal"})
 public class AppController extends ExceptionHandling {
     @GetMapping(value = "/home")
     public String home(){
