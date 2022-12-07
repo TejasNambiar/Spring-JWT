@@ -21,27 +21,11 @@ import javax.persistence.NoResultException;
 import java.io.IOException;
 import java.util.Objects;
 
+import static com.supportportal.utility.constants.Constants.*;
 import static org.springframework.http.HttpStatus.*;
 @Slf4j
 @RestControllerAdvice
 public class ExceptionHandling implements ErrorController {
-
-    private static final String ACCOUNT_LOCKED = "Your account has been locked. Please contact administration";
-    private static final String METHOD_IS_NOT_ALLOWED = "This request method is not allowed on this endpoint. Please send a '%s' request";
-    private static final String INTERNAL_SERVER_ERROR_MSG = "An error occurred while processing the request";
-    private static final String INCORRECT_CREDENTIALS = "Username / password incorrect. Please try again";
-    private static final String ACCOUNT_DISABLED = "Your account has been disabled. If this is an error, please contact administration";
-    private static final String ERROR_PROCESSING_FILE = "Error occurred while processing file";
-    private static final String NOT_ENOUGH_PERMISSION = "You do not have enough permission";
-    public static final String ERROR_PATH = "/error";
-
-    public ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message){
-        HttpResponse httpResponse = new HttpResponse(httpStatus.value(),
-                httpStatus,httpStatus.getReasonPhrase().toUpperCase(),
-                message.toUpperCase());
-
-        return new ResponseEntity<>(httpResponse,httpStatus);
-    }
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<HttpResponse> accountDisabledException() {
@@ -73,7 +57,7 @@ public class ExceptionHandling implements ErrorController {
         return createHttpResponse(BAD_REQUEST, exception.getMessage());
     }
 
-    @ExceptionHandler(UserNameExistsException.class)
+    @ExceptionHandler(UsernameExistException.class)
     public ResponseEntity<HttpResponse> usernameExistException(UsernameExistException exception) {
         return createHttpResponse(BAD_REQUEST, exception.getMessage());
     }
@@ -118,9 +102,14 @@ public class ExceptionHandling implements ErrorController {
         return createHttpResponse(INTERNAL_SERVER_ERROR, ERROR_PROCESSING_FILE);
     }
 
+    private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {
+        return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus,
+                httpStatus.getReasonPhrase().toUpperCase(), message), httpStatus);
+    }
+
     @RequestMapping(ERROR_PATH)
     public ResponseEntity<HttpResponse> notFound404() {
-        return createHttpResponse(NOT_FOUND, "No mapping for this URL!");
+        return createHttpResponse(NOT_FOUND, NO_URL_MAPPING);
     }
 
     public String getErrorPath(){
