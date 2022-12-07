@@ -3,7 +3,7 @@ package com.supportportal.security.configuration;
 import com.supportportal.security.filter.JwtAccessDeniedHandler;
 import com.supportportal.security.filter.JwtAuthenticationEntryPoint;
 import com.supportportal.security.filter.JwtAuthorizationFilter;
-import com.supportportal.utility.SecurityConstant;
+import com.supportportal.utility.constants.SecurityConstant;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

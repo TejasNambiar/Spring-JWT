@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.supportportal.security.enumeration.Role.ROLE_USER;
+import static com.supportportal.utility.constants.Constants.*;
 
 @Slf4j
 @Service
@@ -34,7 +35,7 @@ import static com.supportportal.security.enumeration.Role.ROLE_USER;
 public class UserService implements IUserService, UserDetailsService {
 
     private final UserRepository userRepository;
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
@@ -46,8 +47,8 @@ public class UserService implements IUserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = Optional.ofNullable(userRepository.findUserByUsername(username));
         if(user.isEmpty()) {
-            log.error("User not found by username: " + username);
-            throw new UsernameNotFoundException("User not found by username: " + username);
+            log.error(NO_USER_FOUND_BY_USERNAME + username);
+            throw new UsernameNotFoundException(NO_USER_FOUND_BY_USERNAME + username);
         }else{
             user.get().setLastLoginDateDisplay(user.get().getLastLoginDate());
             user.get().setLastLoginDate(new Date());
@@ -65,6 +66,7 @@ public class UserService implements IUserService, UserDetailsService {
         String encodedPassword = encodedPassword(password);
         User buildUser = User.builder()
                 .userId(generateUserId())
+                .username(username)
                 .firstName(fName)
                 .lastName(lName)
                 .email(email)
@@ -76,14 +78,14 @@ public class UserService implements IUserService, UserDetailsService {
                 .authorities(ROLE_USER.getAuthorities())
                 .profileImageUrl(getTemporaryProfilePicUrl())
                 .build();
-        userRepository.save(buildUser);
+
         log.info("\nNew User Password: "+password);
-        return null;
+        return userRepository.save(buildUser);
     }
 
     private String getTemporaryProfilePicUrl() {
         return ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/user/image/profile/temp").toUriString();
+                .fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH).toUriString();
     }
 
     private String generateUserId() {
@@ -101,36 +103,34 @@ public class UserService implements IUserService, UserDetailsService {
     // going to be used when user is trying to create or update account.
     // Hence, being written slightly generic
     private User validateNewUserNameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
+
+        Optional<User> userByNewUsername = Optional.ofNullable(findByUsername(newUsername));
+        Predicate<User> checkUserById = user -> !user.getId().equals(userByNewUsername.get().getId());
+
+        Optional<User> userByNewEmail = Optional.ofNullable(findByEmail(newEmail));
+        Predicate<User> checkEmailById = user -> !user.getId().equals(userByNewEmail.get().getId());
+
         if(StringUtils.isNotBlank(currentUsername)){
             Optional<User> currentUser = Optional.ofNullable(findByUsername(currentUsername));
 
             if(currentUser.isEmpty())
-                throw new UserNotFoundException("No User found by Username: "+currentUsername);
+                throw new UserNotFoundException(NO_USER_FOUND_BY_USERNAME +currentUsername);
 
-            Optional<User> userByUsername = Optional.ofNullable(findByUsername(newUsername));
-            Predicate<User> checkUserById = user -> !user.getId().equals(userByUsername.get().getId());
-
-            if(userByUsername.isPresent() && checkUserById.test(currentUser.get())){
-                throw new UsernameExistException("Username already exists");
+            if(userByNewUsername.isPresent() && checkUserById.test(currentUser.get())){
+                throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
 
-            Optional<User> userByEmail = Optional.ofNullable(findByEmail(newEmail));
-            Predicate<User> checkEmailById = user -> !user.getId().equals(userByEmail.get().getId());
-
-            if(userByEmail.isPresent() && checkEmailById.test(currentUser.get())){
-                throw new EmailExistException("Email already exists");
+            if(userByNewEmail.isPresent() && checkEmailById.test(currentUser.get())){
+                throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return currentUser.get();
         }else{
-            Optional<User> userByUsername = Optional.ofNullable(findByUsername(newUsername));
-            Optional<User> userByEmail = Optional.ofNullable(findByEmail(newEmail));
-
-            if(userByUsername.isPresent()){
-                throw new UsernameExistException("Username already exists");
+            if(userByNewUsername.isPresent()){
+                throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
 
-            if(userByEmail.isPresent()){
-                throw new EmailExistException("Email already exists");
+            if(userByNewEmail.isPresent()){
+                throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return null;
         }
@@ -138,16 +138,16 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public List<User> getUsers() {
-        return null;
+        return userRepository.findAll();
     }
 
     @Override
     public User findByUsername(String username) {
-        return null;
+        return userRepository.findUserByUsername(username);
     }
 
     @Override
     public User findByEmail(String email) {
-        return null;
+        return userRepository.findUserByEmail(email);
     }
 }

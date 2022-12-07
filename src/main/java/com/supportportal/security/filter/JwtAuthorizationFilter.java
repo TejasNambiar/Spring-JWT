@@ -2,7 +2,6 @@ package com.supportportal.security.filter;
 
 import com.google.common.net.HttpHeaders;
 import com.supportportal.security.JwtTokenProvider;
-import com.supportportal.utility.SecurityConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-import static com.supportportal.utility.SecurityConstant.OPTIONS_HTTP_METHOD;
-import static com.supportportal.utility.SecurityConstant.TOKEN_PREFIX;
+import static com.supportportal.utility.constants.SecurityConstant.OPTIONS_HTTP_METHOD;
+import static com.supportportal.utility.constants.SecurityConstant.TOKEN_PREFIX;
 
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
