@@ -36,26 +36,42 @@ public class UserService implements IUserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         Optional<User> user = Optional.ofNullable(userRepository.findUserByUsername(username));
         if(user.isEmpty()) {
             log.error(NO_USER_FOUND_BY_USERNAME + username);
             throw new UsernameNotFoundException(NO_USER_FOUND_BY_USERNAME + username);
         }else{
+            validateLoginAttempt(user.get());
             user.get().setLastLoginDateDisplay(user.get().getLastLoginDate());
             user.get().setLastLoginDate(new Date());
             userRepository.save(user.get());
             UserPrinciple userPrinciple = new UserPrinciple(user.get());
             log.info("Returning user by username: "+username);
-            return  userPrinciple;
+            return userPrinciple;
+        }
+    }
+
+    private void validateLoginAttempt(User user){
+        if(user.isNotLocked()){
+            if(loginAttemptService.hasExceededMaxAttempt(user.getUsername())){
+                user.setNotLocked(false);
+            }
+            else {
+                user.setNotLocked(true);
+            }
+        }else{
+            loginAttemptService.evictUserFromCache(user.getUsername());
         }
     }
 
